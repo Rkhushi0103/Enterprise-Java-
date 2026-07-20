@@ -1,0 +1,437 @@
+a. Create a Servlet application to upload and download a file.
+CODE:-
+Index.html:
+<!DOCTYPE html>
+<html>
+<head>
+<title>File Upload</title>
+</head>
+<body>
+<h1>File Upload Application</h1>
+<form action="FileUploadServlet" method="post" enctype="multipart/form-data">
+Select file to upload: <input type="file" name="file" required>
+<br><br>
+<input type="submit" value="Upload File">
+</form>
+<h2>Download Links</h2>
+<!-- Link to download files, ensure the path is correct -->
+<a href="FileDownloadServlet?filename= Image of IOT Prac1,2.pdf">
+file</a><br><br><br><br>
+</body>
+</html>
+
+FileUploadServlet.java:
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
+@WebServlet("/FileUploadServlet")
+@MultipartConfig
+public class FileUploadServlet extends HttpServlet {
+private static final String UPLOAD_DIR = "uploads";
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+File uploadDir = new File(uploadPath);
+if (!uploadDir.exists()) {
+uploadDir.mkdir();
+Part filePart = request.getPart("file");
+String fileName = filePart.getSubmittedFileName();
+File file = new File(uploadPath + File.separator + fileName);
+try (InputStream inputStream = filePart.getInputStream();
+OutputStream outputStream = new FileOutputStream(file)) {
+byte[] buffer = new byte[4096];
+int bytesRead;
+while ((bytesRead = inputStream.read(buffer)) != -1) {
+outputStream.write(buffer, 0, bytesRead); }}
+response.getWriter().println("File uploaded successfully Priti Yadav.");
+}}
+
+FileDownloadServlet.java:
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+@WebServlet("/FileDownloadServlet")
+public class FileDownloadServlet extends HttpServlet {
+private static final String UPLOAD_DIR = "uploads";
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+String fileName = request.getParameter("filename");
+if (fileName == null) {
+response.getWriter().println("File name is missing.");
+return; }
+String filePath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR +
+File.separator + fileName;
+File file = new File(filePath);
+if (!file.exists()) {
+response.getWriter().println("File not found.");
+return; }
+response.setContentType("application/octet-stream");
+response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName +
+"\"");
+try (FileInputStream inputStream = new FileInputStream(file);
+OutputStream outputStream = response.getOutputStream()) {
+byte[] buffer = new byte[4096];
+int bytesRead;
+while ((bytesRead = inputStream.read(buffer)) != -1) {
+outputStream.write(buffer, 0, bytesRead);
+}
+}
+}
+}
+
+web.xml:
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE glassfish-web-app PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Servlet 3.0//EN" "http://glassfish.org/dtds/glassfish-web-app_3_0-1.dtd">
+<glassfish-web-app error-url="">
+<context-root>/FileUploadanDownload</context-root>
+<class-loader delegate="true"/>
+<jsp-config>
+<property name="keepgenerated" value="true">
+<description>Keep a copy of the generated servlet class' java code.</description>
+</property>
+</jsp-config>
+</glassfish-web-app>
+
+
+b. Develop Simple Servlet Question Answer Application using Database.
+CODE:-
+CREATE DATABASE qadb;
+USE qadb;
+CREATE TABLE quiz
+(
+qno varchar(5) PRIMARY KEY,
+question varchar(200),
+op1 varchar(100),
+op2 varchar(100),
+op3 varchar(100),
+op4 varchar(100),
+ans varchar(100)
+);
+INSERT INTO quiz VALUES
+('001','Which keyword is used to inherit a class in
+Java?','implements','extends','inherit','using','extends');
+INSERT INTO quiz VALUES
+('002','Which method is the entry point of a Java
+program?','start()','main()','run()','init()','main()');
+INSERT INTO quiz VALUES
+('003','Which package contains Scanner
+class?','java.io','java.util','java.lang','java.sql','java.util');
+INSERT INTO quiz VALUES
+('004','Which is not a primitive data type?','int','float','String','char','String');
+INSERT INTO quiz VALUES
+('005','Which exception occurs when a number is divided by
+zero?','IOException','NullPointerException','ArithmeticException','ClassNotFou
+ndException','ArithmeticException');
+
+Index.html:
+<!DOCTYPE html>
+<html>
+<head>
+<title>Java Quiz</title>
+</head>
+<body bgcolor="lightyellow">
+<center>
+<h1>Java Quiz Application</h1>
+<h3>Click below to start the quiz</h3>
+<a href="QuizServlet">START QUIZ</a>
+</center>
+</body>
+</html>
+QuizServlet.java
+package mypack;
+import java.io.*;
+import java.sql.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+public class QuizServlet extends HttpServlet
+
+{
+public void doGet(HttpServletRequest request,
+HttpServletResponse response)
+throws ServletException, IOException
+{
+response.setContentType("text/html");
+PrintWriter out = response.getWriter();
+out.println("<html>");
+out.println("<body bgcolor='lightblue'>");
+out.println("<center>");
+out.println("<h1>Java Quiz</h1>");
+out.println("</center>");
+out.println("<form action='ShowResult'>");
+try
+{
+Class.forName("com.mysql.cj.jdbc.Driver");
+Connection con = DriverManager.getConnection(
+"jdbc:mysql://localhost:3306/qadb",
+"root",
+"root");
+Statement st = con.createStatement();
+ResultSet rs = st.executeQuery("select * from quiz");
+int i = 1;
+while(rs.next())
+{
+out.println("<hr>");
+out.println("<h3>Q"+i+". "
++rs.getString("question")+
+"</h3>");
+out.println("<input type='radio' name='"+i+"'
+value='"+rs.getString("op1")+"'>"+rs.getString("op1")+"<br>");
+out.println("<input type='radio' name='"+i+"'
+value='"+rs.getString("op2")+"'>"+rs.getString("op2")+"<br>");
+out.println("<input type='radio' name='"+i+"'
+value='"+rs.getString("op3")+"'>"+rs.getString("op3")+"<br>");
+out.println("<input type='radio' name='"+i+"'
+value='"+rs.getString("op4")+"'>"+rs.getString("op4")+"<br>");
+i++;
+}
+con.close();
+}
+catch(Exception e)
+{
+out.println(e);
+}
+out.println("<br>");
+out.println("<input type='submit' value='Submit Quiz'>");
+out.println("<input type='reset' value='Reset'>");
+out.println("</form>");
+out.println("</body>");
+out.println("</html>");
+}
+}
+ShowResult.java
+package mypack;
+import java.io.*;
+import java.sql.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+public class ShowResult extends HttpServlet
+{
+public void doGet(HttpServletRequest request,
+HttpServletResponse response)
+throws ServletException, IOException
+{
+response.setContentType("text/html");
+PrintWriter out = response.getWriter();
+out.println("<html>");
+out.println("<body bgcolor='lightgreen'>");
+out.println("<center>");
+out.println("<h1>Quiz Result</h1>");
+out.println("</center>");
+try
+{
+Class.forName("com.mysql.cj.jdbc.Driver");
+Connection con = DriverManager.getConnection(
+"jdbc:mysql://localhost:3306/qadb",
+"root",
+"root");
+Statement st = con.createStatement();
+ResultSet rs = st.executeQuery("select ans from quiz");
+int score = 0;
+int i = 1;
+while(rs.next())
+{
+String correct = rs.getString("ans");
+String user = request.getParameter(""+i);
+if(correct.equals(user))
+{
+score++;
+out.println("<h3>Q"+i+" : Correct</h3>");
+}
+else
+{
+out.println("<h3>Q"+i+" : Incorrect</h3>");
+}
+i++;
+}
+out.println("<hr>");
+out.println("<h2>Your Score : "+score+" / "+(i-1)+"</h2>");
+con.close();
+}
+catch(Exception e)
+{
+out.println(e);
+}
+out.println("<br><a href='index.html'>Take Quiz Again</a>");
+out.println("</body>");
+out.println("</html>");
+}
+}
+
+web.xml:
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+version="3.1">
+<servlet>
+<servlet-name>QuizServlet</servlet-name>
+<servlet-class>mypack.QuizServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>QuizServlet</servlet-name>
+<url-pattern>/QuizServlet</url-pattern>
+</servlet-mapping>
+<servlet>
+<servlet-name>ShowResult</servlet-name>
+<servlet-class>mypack.ShowResult</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>ShowResult</servlet-name>
+<url-pattern>/ShowResult</url-pattern>
+</servlet-mapping>
+</web-app>
+
+
+c. Create simple Servlet application to demonstrate Non-Blocking Read Operation.
+CODE:-
+index.html:
+<!DOCTYPE html>
+<html>
+<head>
+<title>Non-Blocking Practical</title>
+</head>
+<body>
+<form action="NBServ" method="post">
+<h3> Hey Khushi Click Start Button to Start Non-Blocking Read!!!</h3>
+<input type="submit" value="Start NB IO Read">
+</form>
+<div>TO DO write content</div>
+</body>
+</html>
+
+MyReadListener.java:
+package EJPracts;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.AsyncContext;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
+public class MyReadListener implements ReadListener {
+private ServletInputStream iStream = null;
+private AsyncContext cnt = null;
+public MyReadListener(ServletInputStream in, AsyncContext ac) {
+this.iStream = in;
+this.cnt = ac;}
+@Override
+public void onDataAvailable() {
+try {
+StringBuilder sb = new StringBuilder();
+int len;
+byte[] b = new byte[1024];
+while (iStream.isReady() && (len = iStream.read(b)) != -1) {
+String mydata = new String(b, 0, len);
+sb.append(mydata);
+}} catch (IOException ex) {
+Logger.getLogger(MyReadListener.class.getName()).log(Level.SEVERE, null, ex);
+}}
+@Override
+public void onAllDataRead() {
+System.out.println("Called onAllDataRead()");
+cnt.complete();
+}
+@Override
+public void onError(Throwable t) {
+Logger.getLogger(MyReadListener.class.getName()).log(Level.SEVERE, null, t);
+cnt.complete();
+}}
+
+NBServ.java:
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
+@WebServlet("/NBServ")
+public class NBServ extends HttpServlet {
+protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+response.setContentType("text/html;charset=UTF-8");
+String filepath = "/WEB-INF/student.txt";
+ServletContext cnt = getServletContext();
+InputStream is = cnt.getResourceAsStream(filepath);
+PrintWriter out = response.getWriter();
+if (is == null) {
+out.println("<h2>File NOT FOUND!</h2>");
+return;
+}
+BufferedReader br = new BufferedReader(new InputStreamReader(is));
+String line;
+out.println("<html><body>");
+out.println("<h2>Student Details:</h2>");
+while ((line = br.readLine()) != null) {
+out.println(line + "<br>");
+}
+out.println("</body></html>");
+br.close();
+is.close();
+}
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+processRequest(request, response);
+}
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+processRequest(request, response);
+}
+}
+
+ReadNBServ.java:
+import EJPracts.MyReadListener;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+@WebServlet(name = "ReadNBServ", urlPatterns = {"/ReadNBServ"}, asyncSupported = true)
+public class ReadNBServ extends HttpServlet {
+protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+response.setContentType("text/html;charset=UTF-8");
+try (PrintWriter out = response.getWriter()) {
+out.println("<!DOCTYPE html>");
+out.println("<html>");
+out.println("<head>");
+out.println("<title>Servlet ReadNBServ</title>");
+out.println("</head>");
+out.println("<body>");
+AsyncContext cnt = request.startAsync();
+ServletInputStream iStream = request.getInputStream();
+iStream.setReadListener(new MyReadListener(iStream, cnt));
+out.println("</body>");
+out.println("</html>");}}
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+processRequest(request, response);}
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+processRequest(request, response);}
+@Override
+public String getServletInfo() {
+return "Short description";}
+}
