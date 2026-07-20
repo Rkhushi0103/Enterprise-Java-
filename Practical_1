@@ -1,0 +1,255 @@
+A)Create a simple calculator application using servlet.
+CODE:-
+html: 
+<html>
+<head>
+    <title>Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <form action="Calculator" method="get" name="frm">
+        Enter Number 1 :
+        <input name="num1" type="text" /><br>
+        Enter Number 2 :
+        <input name="num2" type="text" /><br>
+        Operator
+        <select name="Operator">
+            <option value="Addition">+</option>
+            <option value="Subtraction">-</option>
+            <option value="Multiplication">*</option>
+            <option value="Division">/</option>
+        </select>
+        <br><br>
+        <input type="reset" value="Reset" />
+        <input type="submit" value="Submit" />
+    </form>
+</body>
+</html>
+
+Servelte:
+import static java.io.FileDescriptor.out;
+import java.io.IOException;
+import java.io.PrintWriter;
+import static java.lang.System.out;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+@WebServlet(urlPatterns = {"/Calculator"})
+public class calculator extends HttpServlet {
+protected void processRequest(HttpServletRequest request,
+HttpServletResponse response)
+throws ServletException, IOException {
+PrintWriter out=response.getWriter();
+String num1= request.getParameter("num1");
+String num2= request.getParameter("num2");
+String op = request.getParameter("Operator");
+if(op.equals("Addition")){
+out.println("Addition is :"+(Integer.parseInt(num1)+Integer.parseInt(num2)));
+}
+else if (op.equals("Subtraction")){
+out.println("Subtraction is : "+(Integer.parseInt(num1)-Integer.parseInt(num2)));
+}
+else if (op.equals("Multiplication")){
+out.println("Multiplication is :"+(Integer.parseInt(num1)*Integer.parseInt(num2)));
+}
+else{
+out.println("Division is :"+(Integer.parseInt(num1)/Integer.parseInt(num2)));
+}
+out.println("Calculator");
+}
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {processRequest(request, response);}
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {processRequest(request, response);}
+@Override
+public String getServletInfo() {
+return "Short description";
+}// </editor-fold>
+}
+
+B) Create a servlet for a login page. If the username and password are correct then it says message “Hello <username>” else a message “login failed”.
+CODE:-
+html:
+<html>
+<head>
+    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <form action="login" method="get" name="frm">
+        Enter Username:
+        <input name="uname" type="text" />
+        Enter Password:
+        <input name="pass" type="password" />
+        <input name="submit" type="submit" value="Submit" />
+    </form>
+</body>
+</html>
+
+Servlet:
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+@WebServlet(name = "login", urlPatterns = {"/login"})
+public class login extends HttpServlet {
+public void doGet(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+response.setContentType("text/html;charset=UTF-8");
+try (PrintWriter out = response.getWriter()) {
+String uname = request.getParameter("uname");
+String pass = request.getParameter("pass");
+if(uname.equals("user")&& pass.equals("pwd")){
+out.println("Hello <b>" + uname + "</b> welcome to java Servlet");
+}else{
+out.println("Login Failed");
+}
+}
+}
+}
+
+C) Create a registration servlet in Java using JDBC. Accept the details such as Username, Password, Email, and Country from the user using HTML
+Form and store the registration details in the database.
+CODE:-
+<!DOCTYPE html>
+<html>
+<head>
+<title>Practical 1 C</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<form action="login" method="post">
+<table cellpadding="1">
+<thead>
+<tr>
+<th><b>REGISTRATION FORM</b></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><b>First Name : </b></td>
+<td><input type="text" name="fname" value=""></td>
+</tr>
+<tr>
+<td><b>Last Name : </b></td>
+<td><input type="text" name="sname" value=""></td>
+</tr>
+<tr>
+<td><b>Zip Code : </b></td>
+<td><input type="text" name="zip" value=""></td>
+</tr>
+<tr>
+<td><b>User Name : </b></td>
+<td><input type="text" name="uid" value=""></td>
+</tr>
+<tr>
+<td><b>Password : </b></td>
+<td><input type="password" name="pwd" value=""></td>
+</tr>
+<tr>
+<td><b>Confirm Password : </b></td>
+<td><input type="password" name="pwd1" value=""></td>
+</tr>
+<tr>
+<td><b>Town : </b></td>
+<td><input type="text" name="town" value=""></td>
+</tr>
+<tr>
+<td><b>Country : </b></td>
+<td><input type="text" name="country" value=""></td>
+</tr>
+<tr>
+<td><input type="submit" value="Submit"></td>
+</tr>
+</tbody>
+</table>
+</form>
+</body>
+</html>
+
+ServReg:-
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+@WebServlet(urlPatterns = {"/login"})
+public class login extends HttpServlet {
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+response.setContentType("text/html;charset=UTF-8");
+PrintWriter out = response.getWriter();
+Connection connection = null;
+PreparedStatement pst = null;
+try {
+// MySQL Connector 5.1.17 driver
+Class.forName("com.mysql.jdbc.Driver");
+connection = DriverManager.getConnection(
+"jdbc:mysql://localhost:3306/db",
+"root",
+"root"
+);
+String uid = request.getParameter("uid");
+String fname = request.getParameter("fname");
+String sname = request.getParameter("sname");
+
+String pwd = request.getParameter("pwd");
+String pwd1 = request.getParameter("pwd1");
+String town = request.getParameter("town");
+String country = request.getParameter("country");
+String zip = request.getParameter("zip");
+
+String sql = "INSERT INTO user_register VALUES(?,?,?,?,?,?,?,?)";
+pst = connection.prepareStatement(sql);
+pst.setString(1, uid);
+pst.setString(2, fname);
+pst.setString(3, sname);
+pst.setString(4, pwd);
+pst.setString(5, pwd1);
+pst.setString(6, town);
+pst.setString(7, country);
+pst.setString(8, zip);
+
+int rows = pst.executeUpdate();
+if (rows > 0) {
+out.println("<h2>Registration Successful</h2>");
+out.println("Welcome : " + fname);
+} else {
+out.println("Registration Failed");
+}
+
+} catch (ClassNotFoundException e) {
+out.println("Driver missing : " + e.getMessage());
+} catch (SQLException e) {
+out.println("Database Error : " + e.getMessage());
+} finally {
+try {
+if (pst != null) {
+pst.close();
+}
+if (connection != null) {
+connection.close();
+}
+
+} catch (SQLException e) {
+out.println(e.getMessage());
+}
+}
+}
+}
